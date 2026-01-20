@@ -775,5 +775,23 @@ export const DeliveryPartnerPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Invite Section */}
+      <div className="py-8 px-4 md:px-8 pb-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-pink-600 to-pink-500 text-white p-8 md:p-10 rounded-3xl overflow-hidden relative">
+            <div className="relative z-10">
+              <h3 className="font-bold text-2xl md:text-3xl mb-3">Invite Fellow Riders & Delivery Companies!</h3>
+              <p className="text-pink-100 text-base md:text-lg mb-6 max-w-2xl">
+                Know other delivery riders or companies? Share JamJam with them and help grow our network!
+              </p>
+              <button className="px-6 py-3 bg-white text-pink-600 font-bold text-base rounded-xl hover:bg-pink-50 transition-all shadow-lg">
+                Share Link
+              </button>
+            </div>
+            <Bike className="absolute -right-8 -bottom-8 w-40 h-40 md:w-56 md:h-56 opacity-10 rotate-12" />
+          </div>
+        </div>
+      </div>
     </div>;
 };

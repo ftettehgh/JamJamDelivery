@@ -11,6 +11,7 @@ import { DeliveryPartnerPage } from './DeliveryPartnerPage';
 import { ConfettiCelebration } from './ConfettiCelebration';
 import { AboutPage } from './AboutPage';
 import { useCompletionSound } from './useCompletionSound';
+import { AnnouncementBar } from './AnnouncementBar';
 
 // --- Types & Constants ---
 
@@ -475,11 +476,14 @@ export const DeliveryApp = () => {
 
   // @return
   return <div className="min-h-screen bg-black flex flex-col font-sans text-white">
+      {/* Announcement Bar */}
+      <AnnouncementBar />
+
       {/* Confetti Celebration */}
       <ConfettiCelebration isVisible={showCelebration} onClose={handleCelebrationClose} title="Congratulations!" message={isMultiRider ? `Your item has been successfully delivered! Segment ${requiredRiders} of ${requiredRiders} completed. Thank you for using JamJam.` : "Your item has been delivered successfully! Thank you for using JamJam."} />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-black border-b border-gray-800 px-4 md:px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full bg-black border-b border-gray-800 px-4 md:px-8 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 hover:bg-gray-800 rounded-lg md:hidden">
             <Menu className="w-6 h-6" />
@@ -602,12 +606,12 @@ export const DeliveryApp = () => {
         setIsAuthModalOpen(true);
         setCurrentPage('home');
       }} />}
-        </div> : <main className="flex-1 flex flex-col md:flex-row gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full relative">
+        </div> : <main className="flex-1 flex flex-col md:flex-row gap-4 p-4 md:p-6 max-w-7xl mx-auto w-full relative">
           {/* Clickable overlay when delivered - click anywhere to go home */}
           {status === 'delivered' && step === 5 && <div onClick={resetOrder} className="absolute inset-0 z-[5] cursor-pointer" title="Click anywhere to return home" />}
           
           {/* Left Side: Forms / Details */}
-          <div className="w-full md:w-2/5 flex flex-col gap-6 relative z-10">
+          <div className="w-full md:w-2/5 flex flex-col gap-4 relative z-10">
             <AnimatePresence mode="wait">
               {step === 1 && <motion.div key="booking" initial={{
             opacity: 0,
@@ -618,13 +622,13 @@ export const DeliveryApp = () => {
           }} exit={{
             opacity: 0,
             y: -20
-          }} className="bg-[#1f1f1f] p-6 rounded-3xl border border-gray-800">
-                  <div className="mb-6">
+          }} className="bg-[#1f1f1f] p-5 rounded-3xl border border-gray-800">
+                  <div className="mb-5">
                     <h2 className="text-2xl font-bold mb-1 text-white">Book A Delivery</h2>
                     <p className="text-gray-400 text-sm">Our system will assign the best riders for your route</p>
                   </div>
 
-                  <form onSubmit={handleCreateOrder} className="space-y-4">
+                  <form onSubmit={handleCreateOrder} className="space-y-3.5">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pickup Location</label>
                       <div className="relative">
@@ -1063,7 +1067,7 @@ export const DeliveryApp = () => {
                 </motion.div>}
             </AnimatePresence>
 
-            <div className="bg-gradient-to-br from-pink-600 to-pink-500 text-white p-6 rounded-3xl overflow-hidden relative">
+            <div className="bg-gradient-to-br from-pink-600 to-pink-500 text-white p-5 rounded-3xl overflow-hidden relative">
               <div className="relative z-10">
                 <h3 className="font-bold text-lg mb-2">Invite Friends!</h3>
                 <p className="text-pink-100 text-xs mb-4">Help friends with long distance delivery</p>
@@ -1076,7 +1080,7 @@ export const DeliveryApp = () => {
           </div>
 
           {/* Right Side: Visual Map Area */}
-          <div className="flex-1 min-h-[400px] md:min-h-0 bg-[#1a1a1a] rounded-[2.5rem] overflow-hidden relative border border-gray-800">
+          <div className="flex-1 min-h-[500px] md:min-h-0 bg-[#1a1a1a] rounded-[2.5rem] overflow-hidden relative border border-gray-800">
             {/* Mock Map Background */}
             <div className="absolute inset-0 bg-[#111] opacity-60">
               <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -1106,7 +1110,7 @@ export const DeliveryApp = () => {
             {/* Location Markers */}
             <div className="absolute top-[140px] left-[140px] z-10">
               <div className="relative group">
-                <div className="absolute inset-0 bg-green-500 blur-xl opacity-20 scale-150 animate-pulse" />
+                <div className="absolute inset-0 bg-green-500/20 rounded-full blur-xl opacity-20 scale-150 animate-pulse" />
                 <div className="relative bg-[#1f1f1f] p-1 rounded-full shadow-lg border-2 border-green-500">
                   <MapPin className="w-5 h-5 text-green-500" />
                 </div>
@@ -1136,7 +1140,7 @@ export const DeliveryApp = () => {
             delay: 0.5 + index * 0.3
           }} className="absolute z-10" style={positions[index]}>
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-orange-500 blur-xl opacity-20 scale-150 animate-pulse" />
+                    <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-xl opacity-20 scale-150 animate-pulse" />
                     <div className="relative bg-[#1f1f1f] p-1 rounded-full shadow-lg border-2 border-orange-500">
                       <MapPin className="w-4 h-4 text-orange-500" />
                     </div>
@@ -1151,7 +1155,7 @@ export const DeliveryApp = () => {
             {/* Drop-off Location Marker */}
             {(dropoff || pickup) && <div className="absolute bottom-[100px] right-[150px] z-10">
               <div className="relative group">
-                <div className="absolute inset-0 bg-pink-500 blur-xl opacity-20 scale-150 animate-pulse" />
+                <div className="absolute inset-0 bg-pink-500/20 rounded-full blur-xl opacity-20 scale-150 animate-pulse" />
                 <div className="relative bg-[#1f1f1f] p-1 rounded-full shadow-lg border-2 border-pink-500">
                   <Navigation className="w-5 h-5 text-pink-500" />
                 </div>
@@ -1214,7 +1218,7 @@ export const DeliveryApp = () => {
             ease: 'linear'
           }}>
                       <div className="relative">
-                        <div className="absolute inset-0 bg-green-500 blur-md opacity-30 animate-pulse" />
+                        <div className="absolute inset-0 bg-green-500/20 rounded-full blur-md opacity-30 animate-pulse" />
                         <div className="bg-[#1f1f1f] p-2 rounded-2xl shadow-xl border-2 border-green-500 flex items-center gap-2">
                           <div className="bg-green-500/20 p-1.5 rounded-lg text-green-400">
                             <Bike className="w-5 h-5" />
@@ -1250,7 +1254,7 @@ export const DeliveryApp = () => {
           ease: 'linear'
         }}>
                   <div className="relative">
-                    <div className="absolute inset-0 bg-green-500 blur-md opacity-30 animate-pulse" />
+                    <div className="absolute inset-0 bg-green-500/20 rounded-full blur-md opacity-30 animate-pulse" />
                     <div className="bg-[#1f1f1f] p-2 rounded-2xl shadow-xl border-2 border-green-500 flex items-center gap-2">
                       <div className="bg-green-500/20 p-1.5 rounded-lg text-green-400">
                         <Bike className="w-5 h-5" />

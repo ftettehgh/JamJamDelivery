@@ -37,8 +37,14 @@ export const AboutPage = ({
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-white">JamJam</h1>
             </div>
+            <p className="text-2xl md:text-4xl font-bold text-white max-w-4xl mx-auto leading-relaxed mb-8">
+              JamJam is a video e-commerce and live shopping app with fraud protection, instant payout and integrated delivery
+            </p>
+            <p className="text-base md:text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed mb-2">
+              This portal is for the delivery wing of JamJam
+            </p>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Revolutionizing long distance and regional deliveries by connecting multiple riders and delivery companies
+              Revolutionizing long-distance and regional deliveries by connecting multiple riders and delivery companies
             </p>
           </motion.div>
         </div>

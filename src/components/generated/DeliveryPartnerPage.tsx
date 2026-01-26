@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { DollarSign, Clock, Shield, TrendingUp, User, Building2, Mail, Phone, MapPin, ChevronRight, Bike, Car, Truck, FileText, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { DollarSign, Clock, Shield, TrendingUp, User, Building2, Mail, Phone, MapPin, ChevronRight, Bike, Car, Truck, FileText, Plus, Minus, ShoppingBag, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ConfettiCelebration } from './ConfettiCelebration';
 export const DeliveryPartnerPage = () => {
@@ -24,6 +24,13 @@ export const DeliveryPartnerPage = () => {
   const [vehicleQuantities, setVehicleQuantities] = useState<Record<string, number>>({});
   const [experience, setExperience] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
+  const [wearsHelmet, setWearsHelmet] = useState<'yes' | 'no' | ''>('');
+  const [ridersWearHelmet, setRidersWearHelmet] = useState<'yes' | 'no' | ''>('');
+
+  // Step 3 Form state - ID Verification
+  const [govIdNumber, setGovIdNumber] = useState('');
+  const [govIdFile, setGovIdFile] = useState<File | null>(null);
+  const [beneficiaryPhone, setBeneficiaryPhone] = useState('');
   const [coverageArea, setCoverageArea] = useState('');
   const [coverageType, setCoverageType] = useState<'region-to-region' | 'door-to-door' | ''>('');
   const [regionToRegion, setRegionToRegion] = useState<Array<{
@@ -41,7 +48,7 @@ export const DeliveryPartnerPage = () => {
   const [apiDetails, setApiDetails] = useState('');
   const [deliversToAllCapitals, setDeliversToAllCapitals] = useState(false);
 
-  // Step 3 Form state
+  // Terms and conditions state
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Celebration state
@@ -95,7 +102,6 @@ export const DeliveryPartnerPage = () => {
     label: 'Expert',
     subtitle: '5+ years'
   }];
-
   // Get selected vehicles (vehicles with quantity > 0)
   const selectedVehicles = Object.keys(vehicleQuantities).filter(id => vehicleQuantities[id] > 0);
   const toggleVehicle = (vehicleId: string) => {
@@ -154,14 +160,26 @@ export const DeliveryPartnerPage = () => {
       if (selectedType === 'company' && hasAPI === '') {
         return; // Require API selection for companies
       }
-      setFormStep(3);
+      if (selectedType === 'individual' && !licenseNumber) {
+        return; // Require license number for individual riders
+      }
+      setFormStep(3); // Go to ID verification step
     }
-  };
-  const handleBackToStep1 = () => {
-    setFormStep(1);
   };
   const handleBackToStep2 = () => {
     setFormStep(2);
+  };
+  const handleContinueStep3 = () => {
+    // Validate step 3 fields - Government ID number and file are required
+    if (govIdNumber && govIdFile && beneficiaryPhone) {
+      setFormStep(4); // Go to review step
+    }
+  };
+  const handleBackToStep3 = () => {
+    setFormStep(3);
+  };
+  const handleBackToStep1 = () => {
+    setFormStep(1);
   };
   const handleSubmit = () => {
     if (agreedToTerms) {
@@ -181,6 +199,9 @@ export const DeliveryPartnerPage = () => {
     setVehicleQuantities({});
     setExperience('');
     setLicenseNumber('');
+    setGovIdNumber('');
+    setGovIdFile(null);
+    setBeneficiaryPhone('');
     setCoverageArea('');
     setCoverageType('');
     setRegionToRegion([{
@@ -198,6 +219,8 @@ export const DeliveryPartnerPage = () => {
     setOtp('');
     setOtpSent(false);
     setDeliversToAllCapitals(false);
+    setWearsHelmet('');
+    setRidersWearHelmet('');
   };
 
   // Functions to manage region-to-region pairs
@@ -337,15 +360,17 @@ export const DeliveryPartnerPage = () => {
               <p className="text-gray-400 text-sm">
                 {formStep === 1 && 'Tell us about yourself'}
                 {formStep === 2 && 'Your delivery capabilities'}
-                {formStep === 3 && 'Review and submit'}
+                {formStep === 3 && 'ID verification'}
+                {formStep === 4 && 'Review and submit'}
               </p>
             </div>
 
             {/* Step Indicators */}
             <div className="flex items-center justify-end gap-3 mb-8">
-              {[1, 2, 3].map(step => <div key={step} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step < formStep ? 'bg-pink-600 text-white' : step === formStep ? 'bg-pink-600 text-white' : 'bg-[#2a2a2a] text-gray-600 border border-gray-700'}`}>
-                  {step < formStep ? '✓' : step}
-                </div>)}
+              <div className={`w-3 h-3 rounded-full transition-all ${formStep === 1 ? 'bg-pink-600' : 'bg-gray-700'}`} />
+              <div className={`w-3 h-3 rounded-full transition-all ${formStep === 2 ? 'bg-pink-600' : 'bg-gray-700'}`} />
+              <div className={`w-3 h-3 rounded-full transition-all ${formStep === 3 ? 'bg-pink-600' : 'bg-gray-700'}`} />
+              <div className={`w-3 h-3 rounded-full transition-all ${formStep === 4 ? 'bg-pink-600' : 'bg-gray-700'}`} />
             </div>
 
             {/* Step 1: Basic Information */}
@@ -495,19 +520,49 @@ export const DeliveryPartnerPage = () => {
                     </div>
                   </div>}
 
-                {/* Delivery Experience - Box Selection */}
-                {selectedType === 'individual' && <div className="mb-6">
+                {/* Helmet Question for Delivery Companies with Motorcycle or Bicycle */}
+                {selectedType === 'company' && (selectedVehicles.includes('motorcycle') || selectedVehicles.includes('bicycle')) && <div className="mb-6">
                     <label className="text-sm font-medium text-gray-300 mb-3 block">
+                      Do your riders wear helmet?
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button onClick={() => setRidersWearHelmet('yes')} className={`p-4 rounded-xl border-2 transition-all ${ridersWearHelmet === 'yes' ? 'bg-[#2a2a2a] border-pink-600 text-white' : 'bg-[#2a2a2a] border-gray-700 text-gray-400 hover:border-gray-600'}`}>
+                        Yes
+                      </button>
+                      <button onClick={() => setRidersWearHelmet('no')} className={`p-4 rounded-xl border-2 transition-all ${ridersWearHelmet === 'no' ? 'bg-[#2a2a2a] border-pink-600 text-white' : 'bg-[#2a2a2a] border-gray-700 text-gray-400 hover:border-gray-600'}`}>
+                        No
+                      </button>
+                    </div>
+                  </div>}
+
+                {/* Helmet Question for Individual Riders with Motorcycle or Bicycle */}
+                {selectedType === 'individual' && (selectedVehicles.includes('motorcycle') || selectedVehicles.includes('bicycle')) && <div className="mb-6">
+                    <label className="text-sm font-medium text-gray-300 mb-3 block">
+                      Do you wear helmet when riding?
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button onClick={() => setWearsHelmet('yes')} className={`p-4 rounded-xl border-2 transition-all ${wearsHelmet === 'yes' ? 'bg-[#2a2a2a] border-pink-600 text-white' : 'bg-[#2a2a2a] border-gray-700 text-gray-400 hover:border-gray-600'}`}>
+                        Yes
+                      </button>
+                      <button onClick={() => setWearsHelmet('no')} className={`p-4 rounded-xl border-2 transition-all ${wearsHelmet === 'no' ? 'bg-[#2a2a2a] border-pink-600 text-white' : 'bg-[#2a2a2a] border-gray-700 text-gray-400 hover:border-gray-600'}`}>
+                        No
+                      </button>
+                    </div>
+                  </div>}
+
+                {/* Delivery Experience - Box Selection */}
+                {selectedType === 'individual' && <div className="mb-4">
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
                       Delivery Experience
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       {experienceOptions.map(exp => {
                   const isSelected = experience === exp.id;
-                  return <button key={exp.id} onClick={() => setExperience(exp.id)} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 ${isSelected ? 'bg-[#2a2a2a] border-pink-600' : 'bg-[#2a2a2a] border-gray-700 hover:border-gray-600'}`}>
-                            <span className={`text-base font-bold ${isSelected ? 'text-white' : 'text-gray-400'}`}>
+                  return <button key={exp.id} onClick={() => setExperience(exp.id)} className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${isSelected ? 'bg-[#2a2a2a] border-pink-600' : 'bg-[#2a2a2a] border-gray-700 hover:border-gray-600'}`}>
+                            <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-gray-400'}`}>
                               {exp.label}
                             </span>
-                            <span className={`text-xs ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
+                            <span className={`text-xs ${isSelected ? 'text-pink-300' : 'text-gray-500'}`}>
                               {exp.subtitle}
                             </span>
                           </button>;
@@ -522,7 +577,7 @@ export const DeliveryPartnerPage = () => {
                   </label>
                   {selectedType === 'individual' ? <div className="relative">
                       <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                      <input type="text" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="Enter your license number" className="w-full pl-12 pr-4 py-4 bg-[#2a2a2a] border border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:outline-none transition-all text-white placeholder-gray-500" />
+                      <input type="text" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="Enter your license number" className="w-full pl-12 pr-4 py-4 bg-[#2a2a2a] border border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:outline-none transition-all text-white placeholder-gray-500" required />
                     </div> : <div className="space-y-4">
                       {/* Coverage Type Selection */}
                       <div className="grid grid-cols-2 gap-4">
@@ -631,15 +686,74 @@ export const DeliveryPartnerPage = () => {
                   <button onClick={handleBackToStep1} className="px-8 py-4 text-gray-400 hover:text-white font-medium transition-all">
                     Back
                   </button>
-                  <button onClick={handleContinueStep2} disabled={selectedVehicles.length === 0 || selectedType === 'company' && hasAPI === ''} className={`px-8 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 ${selectedVehicles.length > 0 && (selectedType === 'individual' || hasAPI !== '') ? 'bg-gradient-to-r from-[#4a5568] to-[#2d3748] hover:from-[#5a6578] hover:to-[#3d4758] text-white' : 'bg-[#2a2a2a] text-gray-600 cursor-not-allowed'}`}>
+                  <button onClick={handleContinueStep2} disabled={selectedVehicles.length === 0 || selectedType === 'company' && hasAPI === '' || selectedType === 'individual' && !licenseNumber} className={`px-8 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 ${selectedVehicles.length > 0 && (selectedType === 'individual' ? licenseNumber : true) && (selectedType === 'company' ? hasAPI !== '' : true) ? 'bg-gradient-to-r from-[#4a5568] to-[#2d3748] hover:from-[#5a6578] hover:to-[#3d4758] text-white' : 'bg-[#2a2a2a] text-gray-600 cursor-not-allowed'}`}>
                     Continue
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
               </div>}
 
-            {/* Step 3: Review and Submit */}
+            {/* Step 3: ID Verification */}
             {formStep === 3 && <div>
+                <div className="space-y-4">
+                  {/* Government ID Number */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Government ID Number <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <input type="text" value={govIdNumber} onChange={e => setGovIdNumber(e.target.value)} placeholder="Enter your government ID number" className="w-full pl-12 pr-4 py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:outline-none transition-all text-white placeholder-gray-500" required />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Enter your national ID, passport, or driver's license number</p>
+                  </div>
+
+                  {/* Upload Government ID */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Upload Government ID <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input type="file" accept="image/*,.pdf" onChange={e => setGovIdFile(e.target.files?.[0] || null)} className="hidden" id="gov-id-upload" />
+                      <label htmlFor="gov-id-upload" className="flex items-center justify-center gap-2 w-full p-3 bg-[#2a2a2a] border-2 border-dashed border-gray-700 rounded-xl hover:border-pink-500 transition-all cursor-pointer">
+                        <Upload className="w-5 h-5 text-gray-400" />
+                        <div className="text-center">
+                          <p className="text-white font-medium text-sm">
+                            {govIdFile ? govIdFile.name : 'Click to upload Government ID'}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">PNG, JPG or PDF (max. 10MB)</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Beneficiary Phone Number */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Beneficiary Phone Number <span className="text-pink-500">*</span> <span className="text-xs text-gray-500 font-normal">(Important)</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <input type="tel" value={beneficiaryPhone} onChange={e => setBeneficiaryPhone(e.target.value)} placeholder="+233 24 123 4567" className="w-full pl-12 pr-4 py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:outline-none transition-all text-white placeholder-gray-500" required />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">A friend, family member or co-worker we can contact in case of an emergency or accident</p>
+                  </div>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-8 flex justify-between">
+                  <button onClick={handleBackToStep2} className="px-8 py-4 text-gray-400 hover:text-white font-medium transition-all">
+                    Back
+                  </button>
+                  <button onClick={handleContinueStep3} disabled={!govIdNumber || !govIdFile || !beneficiaryPhone} className={`px-8 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 ${govIdNumber && govIdFile && beneficiaryPhone ? 'bg-gradient-to-r from-[#4a5568] to-[#2d3748] hover:from-[#5a6578] hover:to-[#3d4758] text-white' : 'bg-[#2a2a2a] text-gray-600 cursor-not-allowed'}`}>
+                    Continue
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>}
+
+            {/* Step 4: Review and Submit */}
+            {formStep === 4 && <div>
                 <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-gray-800 mb-6">
                   <h3 className="text-xl font-bold mb-6">Application Summary</h3>
 
@@ -700,6 +814,16 @@ export const DeliveryPartnerPage = () => {
                       {selectedType === 'individual' && licenseNumber && <div>
                           <p className="text-gray-400 text-sm mb-1">License Number:</p>
                           <p className="text-white font-medium">{licenseNumber}</p>
+                        </div>}
+
+                      {selectedType === 'individual' && wearsHelmet && <div>
+                          <p className="text-gray-400 text-sm mb-1">Wears Helmet:</p>
+                          <p className="text-white font-medium">{wearsHelmet === 'yes' ? 'Yes' : 'No'}</p>
+                        </div>}
+
+                      {selectedType === 'company' && (selectedVehicles.includes('motorcycle') || selectedVehicles.includes('bicycle')) && ridersWearHelmet && <div>
+                          <p className="text-gray-400 text-sm mb-1">Riders Wear Helmet:</p>
+                          <p className="text-white font-medium">{ridersWearHelmet === 'yes' ? 'Yes' : 'No'}</p>
                         </div>}
 
                       {selectedType === 'company' && coverageArea && <div>
@@ -763,7 +887,7 @@ export const DeliveryPartnerPage = () => {
 
                 {/* Navigation Buttons */}
                 <div className="flex justify-between">
-                  <button onClick={handleBackToStep2} className="px-8 py-4 text-gray-400 hover:text-white font-medium transition-all">
+                  <button onClick={handleBackToStep3} className="px-8 py-4 text-gray-400 hover:text-white font-medium transition-all">
                     Back
                   </button>
                   <button onClick={handleSubmit} disabled={!agreedToTerms} className={`px-8 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 ${agreedToTerms ? 'bg-gradient-to-r from-[#4a5568] to-[#2d3748] hover:from-[#5a6578] hover:to-[#3d4758] text-white' : 'bg-[#2a2a2a] text-gray-600 cursor-not-allowed'}`}>
